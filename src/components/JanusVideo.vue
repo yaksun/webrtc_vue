@@ -1,0 +1,121 @@
+<template>
+  <!-- Janus Video -->
+  <div>
+    <video
+      :key='id'
+      :id='id'
+      class='janus-video'
+      playsinline
+      autoplay
+      muted
+    ></video>
+  </div>
+</template>
+
+<script>
+import Janus from '../janus'
+
+export default {
+  name: 'JanusVideo',
+  props: {
+    id: {
+      type: String,
+      required: true
+    },
+    janus: {
+      type: Object
+    }
+  },
+  data () {
+    return {
+      streaming: []
+    }
+  },
+  mounted () {
+    this.initJanus()
+  },
+  methods: {
+    // Init Janus
+    initJanus () {
+      const vm = this
+      vm.janus.attach(
+        {
+          opaqueId: 'test-' + vm.id,
+
+          plugin: 'janus.plugin.streaming',
+          success: function (pluginHandle) {
+            console.log(`iteration ${vm.id} janus attach - onSuccess called, plugin handle::`, pluginHandle)
+            console.log('pluginHandle=', pluginHandle)
+            vm.streaming.push({ id: vm.id, plugin: pluginHandle })
+            let body = { 'request': 'watch', id: parseInt(vm.id) }
+            console.log(`iteration ${vm.id} sending watch request::`)
+            pluginHandle.send({
+              message: {
+                type: 'rtsp',
+                id: vm.id * 1,
+                description: vm.id,
+                audio: false,
+                video: true,
+                url: `rtsp://172.16.4.8:8554/deviceid=4201550086${vm.id}channelid=4201550086${vm.id}realm=4201550086`,
+                rtsp_user: 'admin',
+                rtsp_pwd: 'admin12345',
+                request: 'create',
+                admin_key: '123456',
+                name: 'xx',
+                is_private: false,
+                data: true
+              },
+              success: function () {
+                pluginHandle.send({ 'message': body })
+              }
+            })
+          },
+          error: function (error) { console.log(error) },
+          onmessage: function (msg, jsep) {
+            console.log(`iteration ${vm.id} new message received! msg::`, msg)
+            console.log(`iteration ${vm.id} the accompanying jsep was::`, jsep)
+
+            if (jsep !== undefined && jsep !== null) {
+              console.log(`iteration ${vm.id} jsep was not null or undefined THIS IS GOOD`)
+
+              const foundStream = vm.streaming.find(s => s.id === vm.id)
+
+              if (jsep.type === 'offer') {
+                console.log(`iteration ${vm.id} the jsep type was an offer, lets make an answer`)
+                foundStream.plugin.createAnswer(
+                  {
+                    jsep,
+                    media: { audioSend: false, videoSend: false },
+                    success: function (jsep) {
+                      console.log(`iteration ${vm.id} sending a message to request the stream starts`)
+                      const body = { 'request': 'start' }
+
+                      foundStream.plugin.send({ 'message': body, 'jsep': jsep })
+                    },
+                    error: function (error) {
+                      Janus.error('WebRTC error:', error)
+                    }
+                  }
+                )
+              }
+            }
+          },
+          onremotestream: function (stream) {
+            console.log(`iteration ${vm.id} on remote stream being called`)
+            const element = document.getElementById(vm.id)
+            Janus.attachMediaStream(element, stream)
+          }
+        })
+    }
+  }
+}
+</script>
+
+<style scoped lang='sass'>
+.janus-video
+  width: 350px
+  height: 200px
+  background: black
+  border: 5px solid rgba(35, 177, 104, 0.83)
+  margin: 30px 10px
+</style>
