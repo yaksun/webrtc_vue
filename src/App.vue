@@ -1,18 +1,11 @@
 <template>
   <div id="app">
     <!-- Janus Videos List -->
-    <div v-if="!loading">
-      <JanusVideo :janus="janus" id='1320000002'/>
-    </div>
-    <div v-if='!loading'>
-       <JanusVideo :janus="janus" id='1320000003'/>
-    </div>
-    <div v-if='!loading'>
-       <JanusVideo :janus="janus" id='1320000004'/>
-    </div>
-      <div v-if='!loading'>
-       <JanusVideo :janus="janus" id='1320000004'/>
-    </div>
+    <template v-for="(item,index) in list">
+      <div v-if="!loading" :key='index'>
+        <JanusVideo :janus="janus" :id='item'/>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -27,7 +20,7 @@ export default {
     return {
       janus: null,
       loading: false,
-      list: [1320000002, 1320000003, 1320000004, 1320000005]
+      list: ['1320000002']
     }
   },
   mounted () {
@@ -46,7 +39,7 @@ export default {
           this.janus = new Janus(
             {
               server,
-              success: (pluginHandle) => {
+              success: () => {
                 this.loading = false
               },
               error: (cause) => {
@@ -65,9 +58,10 @@ export default {
 
 <style lang="sass">
 #app
-  height: 90vh
-  display: flex
-  flex-wrap: wrap
-  align-items: center
-  justify-content: center
+  height: 100%
+  width: 100%
+  overflow: 'hidden'
+  display: grid
+  grid-template-columns: repeat(3, 33.33%)
+  grid-template-rows: repeat(3, 33.33%)
 </style>

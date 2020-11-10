@@ -1,6 +1,6 @@
 <template>
   <!-- Janus Video -->
-  <div>
+  <div class='item'>
     <video
       :key='id'
       :id='id'
@@ -112,10 +112,10 @@ export default {
 </script>
 
 <style scoped lang='sass'>
-.janus-video
-  width: 350px
-  height: 200px
-  background: black
-  border: 5px solid rgba(35, 177, 104, 0.83)
-  margin: 30px 10px
+.item
+   height: 100%
+   width:100%
+   .janus-video
+    height: 100%
+    width:100%
 </style>
