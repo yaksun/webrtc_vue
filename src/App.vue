@@ -20,7 +20,8 @@ export default {
     return {
       janus: null,
       loading: false,
-      list: ['1320000002']
+      // list: ['1320000002', '1320000003', '1320000004', '1320000005']
+      list: ['1320009998']
     }
   },
   mounted () {

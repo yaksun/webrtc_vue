@@ -1,11 +1,14 @@
 <template>
   <!-- Janus Video -->
   <div class='item'>
+    <button @click="stopStream">关闭</button>
     <video
       :key='id'
       :id='id'
-      class='janus-video'
+      controls
+      class="video-js vjs-default-skin vjs-big-play-centered"
       playsinline
+      preload="auto"
       autoplay
       muted
     ></video>
@@ -28,7 +31,8 @@ export default {
   },
   data () {
     return {
-      streaming: []
+      streaming: [],
+      tempfoundStream: { }
     }
   },
   mounted () {
@@ -46,6 +50,7 @@ export default {
           success: function (pluginHandle) {
             console.log(`iteration ${vm.id} janus attach - onSuccess called, plugin handle::`, pluginHandle)
             console.log('pluginHandle=', pluginHandle)
+            vm.tempfoundStream = pluginHandle
             vm.streaming.push({ id: vm.id, plugin: pluginHandle })
             let body = { 'request': 'watch', id: parseInt(vm.id) }
             console.log(`iteration ${vm.id} sending watch request::`)
@@ -56,7 +61,7 @@ export default {
                 description: vm.id,
                 audio: false,
                 video: true,
-                url: `rtsp://172.16.4.8:8554/deviceid=4201550086${vm.id}channelid=4201550086${vm.id}realm=4201550086`,
+                url: `rtsp://172.16.14.84:554/deviceid=4201550086${vm.id}channelid=4201550086${vm.id}realm=4201550086`,
                 rtsp_user: 'admin',
                 rtsp_pwd: 'admin12345',
                 request: 'create',
@@ -79,7 +84,6 @@ export default {
               console.log(`iteration ${vm.id} jsep was not null or undefined THIS IS GOOD`)
 
               const foundStream = vm.streaming.find(s => s.id === vm.id)
-
               if (jsep.type === 'offer') {
                 console.log(`iteration ${vm.id} the jsep type was an offer, lets make an answer`)
                 foundStream.plugin.createAnswer(
@@ -106,7 +110,18 @@ export default {
             Janus.attachMediaStream(element, stream)
           }
         })
+    },
+    stopStream () {
+      let body = { request: 'stop' }
+      let body2 = {
+        request: 'destroy',
+        id: this.id * 1
+      }
+      this.tempfoundStream.send({ message: body })
+      this.tempfoundStream.send({ message: body2 })
+      this.tempfoundStream.hangup()
     }
+
   }
 }
 </script>
