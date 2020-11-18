@@ -17,7 +17,7 @@
 
 <script>
 import Janus from '../janus'
-
+import Common from '../config'
 export default {
   name: 'JanusVideo',
   props: {
@@ -61,7 +61,7 @@ export default {
                 description: vm.id,
                 audio: false,
                 video: true,
-                url: `rtsp://172.16.14.84:554/deviceid=4201550086${vm.id}channelid=4201550086${vm.id}realm=4201550086`,
+                url: `${Common.baseUrl}deviceid=${Common.realm}${vm.id}channelid=${Common.realm}${vm.id}realm=${Common.realm}`,
                 rtsp_user: 'admin',
                 rtsp_pwd: 'admin12345',
                 request: 'create',
