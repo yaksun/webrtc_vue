@@ -17,7 +17,6 @@
 
 <script>
 import Janus from '../janus'
-import Common from '../config'
 export default {
   name: 'JanusVideo',
   props: {
@@ -27,6 +26,12 @@ export default {
     },
     janus: {
       type: Object
+    },
+    baseUrl: {
+      type: String
+    },
+    realm: {
+      type: String
     }
   },
   data () {
@@ -42,6 +47,7 @@ export default {
     // Init Janus
     initJanus () {
       const vm = this
+      const { baseUrl, realm } = this
       vm.janus.attach(
         {
           opaqueId: 'test-' + vm.id,
@@ -61,12 +67,12 @@ export default {
                 description: vm.id,
                 audio: false,
                 video: true,
-                url: `${Common.baseUrl}deviceid=${Common.realm}${vm.id}channelid=${Common.realm}${vm.id}realm=${Common.realm}`,
+                url: `${baseUrl}deviceid=${realm}${vm.id}channelid=${realm}${vm.id}realm=${realm}`,
                 rtsp_user: 'admin',
                 rtsp_pwd: 'admin12345',
                 request: 'create',
                 admin_key: '123456',
-                name: 'xx',
+                name: vm.id,
                 is_private: false,
                 data: true
               },
@@ -122,6 +128,9 @@ export default {
       this.tempfoundStream.hangup()
     }
 
+  },
+  beforeDestroy () {
+    this.stopStream()
   }
 }
 </script>

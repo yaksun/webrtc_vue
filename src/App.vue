@@ -3,7 +3,7 @@
     <!-- Janus Videos List -->
     <template v-for="(item,index) in list">
       <div v-if="!loading" :key='index'>
-        <JanusVideo :janus="janus" :id='item'/>
+        <JanusVideo :janus="janus" :id='item' :baseUrl='$config.baseUrl' :realm='$config.realm'/>
       </div>
     </template>
   </div>
@@ -11,7 +11,6 @@
 
 <script>
 import Janus from './janus'
-
 export default {
   components: {
     JanusVideo: () => import('@/components/JanusVideo')
@@ -20,11 +19,17 @@ export default {
     return {
       janus: null,
       loading: false,
-      list: ['1320000002', '1320000003', '1320000004', '1320000005']
+      // list: ['1320000002', '1320000003', '1320000004', '1320000005']
+      list: [],
+      server: ''
     }
   },
   mounted () {
     this.initJanus()
+    const { $config } = this
+    console.log(this.$config)
+    this.list = $config.idList
+    this.server = $config.server
   },
   beforeDestroy () {
     this.janus.destroy()
